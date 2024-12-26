@@ -1,0 +1,56 @@
+.home-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    text-align: center;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.home-container h1 {
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.home-container p {
+    color: #555;
+    margin: 10px 0;
+}
+
+.home-buttons {
+    margin: 20px 0;
+}
+
+.home-buttons button {
+    margin: 5px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+}
+
+.home-buttons button:hover {
+    background-color: #0056b3;
+}
+
+.transactions-section {
+    margin-top: 20px;
+    text-align: left;
+}
+
+.transactions-section h3 {
+    color: #333;
+}
+
+.transactions-section ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.transactions-section li {
+    margin-bottom: 10px;
+    color: #555;
+}

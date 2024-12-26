@@ -1,0 +1,78 @@
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #333;
+  padding: 10px 20px;
+}
+
+.navbar h1 {
+  color: white;
+}
+
+.menu-links {
+  display: flex;
+  gap: 20px;
+}
+
+.menu-links a {
+  color: white;
+  text-decoration: none;
+}
+
+.hamburger {
+  display: none;  /* Initially hide hamburger button */
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.hamburger .bar {
+  display: block;
+  width: 25px;
+  height: 3px;
+  margin: 5px auto;
+  background-color: white;
+}
+
+@media (max-width: 768px) {  /* Apply styles for small screens */
+  .menu-links {
+    display: none;  /* Hide menu links by default on small screens */
+    flex-direction: column;
+    position: absolute;
+    top: 60px;
+    right: 20px;
+    background-color: #333;
+    padding: 10px;
+    border-radius: 5px;
+  }
+
+  .menu-links.open {
+    display: flex;  /* Show menu when it's open */
+  }
+
+  .hamburger {
+    display: block;  /* Show hamburger button on small screens */
+  }
+}
+.logout-button {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 10px;
+}
+.logout-button:hover {
+  text-decoration: underline;
+}
+.menu-links button {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 10px;
+}
+
+.menu-links button:hover {
+  text-decoration: underline;
+}
