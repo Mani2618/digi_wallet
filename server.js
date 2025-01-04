@@ -1,4 +1,3 @@
-// server.js
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -50,15 +49,17 @@ const transactionSchema = new mongoose.Schema({
 
 const Transaction = mongoose.model('Transaction', transactionSchema);
 
-// Routes
-
 // Generate unique UPI ID
-const generateUPIId = () => `${crypto.randomBytes(4).toString('hex')}@fastpay`;
+const generateUPIId = () => `${crypto.randomBytes(4).toString('hex')}@payTM`;
 
 // Signup Route
 app.post('/api/signup', async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, confirmPassword } = req.body;
+
+    if (password !== confirmPassword) {
+      return res.status(400).json({ message: 'Passwords do not match' });
+    }
 
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(400).json({ message: 'User already exists' });
@@ -79,15 +80,10 @@ app.post('/api/login', async (req, res) => {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ message: 'Invalid credentials' });
-    }
+    if (!user) return res.status(400).json({ message: 'Invalid User' });
 
-    // Compare password with hashed password
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ message: 'Invalid credentials' });
-    }
+    if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
     res.status(200).json({ message: 'Login successful', upiId: user.upiId, balance: user.balance });
   } catch (err) {
@@ -101,7 +97,8 @@ app.get('/api/user/:upiId', async (req, res) => {
     const user = await User.findOne({ upiId: req.params.upiId });
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    res.status(200).json(user);
+    const { name, email, upiId, balance } = user;
+    res.status(200).json({ name, email, upiId, balance });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
@@ -112,22 +109,45 @@ app.post('/api/transaction', async (req, res) => {
   try {
     const { sender_upi_id, receiver_upi_id, amount } = req.body;
 
+    console.log('Transaction request:', req.body);
+
+    if (!sender_upi_id || !receiver_upi_id || !amount) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
+    if (amount <= 0) {
+      return res.status(400).json({ message: 'Amount must be greater than zero' });
+    }
+
     const sender = await User.findOne({ upiId: sender_upi_id });
     const receiver = await User.findOne({ upiId: receiver_upi_id });
 
-    if (!sender || !receiver) return res.status(404).json({ message: 'User(s) not found' });
-    if (sender.balance < amount) return res.status(400).json({ message: 'Insufficient balance' });
+    console.log('Sender:', sender, 'Receiver:', receiver);
+
+    if (!sender) return res.status(404).json({ message: 'Sender not found' });
+    if (!receiver) return res.status(404).json({ message: 'Receiver not found' });
+
+    if (sender.balance < amount) {
+      return res.status(400).json({ message: 'Insufficient balance' });
+    }
 
     sender.balance -= amount;
     receiver.balance += amount;
+
     await sender.save();
     await receiver.save();
 
     const transaction = new Transaction({ sender_upi_id, receiver_upi_id, amount });
     await transaction.save();
 
-    res.status(200).json({ message: 'Transaction successful' });
+    console.log('Transaction saved:', transaction);
+
+    res.status(200).json({ 
+      message: 'Transaction successful', 
+      sender_balance: sender.balance, 
+      receiver_balance: receiver.balance 
+    });
   } catch (err) {
+    console.error('Transaction error details:', err);
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 });
@@ -135,28 +155,33 @@ app.post('/api/transaction', async (req, res) => {
 // Fetch Transactions Route
 app.get('/api/transactions/:upiId', async (req, res) => {
   try {
+    console.log('Fetching transactions for UPI ID:', req.params.upiId);
+
+    const upiId = req.params.upiId;
+
+    if (!upiId) {
+      return res.status(400).json({ message: 'UPI ID is required' });
+    }
+
     const transactions = await Transaction.find({
       $or: [{ sender_upi_id: req.params.upiId }, { receiver_upi_id: req.params.upiId }],
     }).sort({ timestamp: -1 });
 
+    console.log('Transactions found:', transactions);
+
+    if (!transactions.length) {
+      return res.status(404).json({ message: 'No transactions found' });
+    }
+
     res.status(200).json(transactions);
   } catch (err) {
+    console.error('Error fetching transactions:', err);
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 });
 
 // Start Server
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
-mongoose.connection.on('connected', () => {
-    console.log('Mongoose connected to MongoDB');
-  });
-  
-  mongoose.connection.on('error', (err) => {
-    console.error('Mongoose connection error:', err);
-  });
-  
-  mongoose.connection.on('disconnected', () => {
-    console.log('Mongoose disconnected from MongoDB');
-  });
+
