@@ -6,7 +6,6 @@ const Home = () => {
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState([]);
   const [showSendModal, setShowSendModal] = useState(false);
-  const [showRequestModal, setShowRequestModal] = useState(false);
 
   useEffect(() => {
     const storedUpiId = localStorage.getItem("upiId");
@@ -47,7 +46,7 @@ const Home = () => {
           const updatedBalance = prev - amount;
           localStorage.setItem("balance", updatedBalance);
           return updatedBalance;
-        });        
+        });
         setShowSendModal(false);
       } else {
         alert(data.message || "Transaction failed");
@@ -57,21 +56,37 @@ const Home = () => {
     }
   };
 
-  const handleRequestMoney = async (receiverUpiId, amount) => {
-    alert(`Money request of ₹${amount} sent to ${receiverUpiId}`);
-    setShowRequestModal(false);
-  };
-
   return (
     <div className="home-container">
-      <h2>Welcome to PayTM Wallet</h2>
-      <div className="balance-section">
-        <h3>Balance: ₹{balance}</h3>
-        <p>UPI ID: {upiId}</p>
-      </div>
-      <div className="actions">
-        <button onClick={() => setShowSendModal(true)}>Send Money</button>
-        <button onClick={() => setShowRequestModal(true)}>Receive Money</button>
+      <div className="content-section">
+      <div className="left-content">
+          <div className="balance-section">
+            <h3>Balance: ₹{balance}</h3>
+            <p>UPI ID: {upiId}</p>
+          </div>
+          <div className="actions">
+            <button onClick={() => setShowSendModal(true)}>Send Money</button>
+          </div>
+        </div>
+        <div className="right-content">
+          <h2>
+            Welcome to <span>Pay</span><span>TM</span>❤️UPI
+          </h2>
+          <p>
+            Simplify your payments with PayTM UPI. Send and receive money instantly, manage your balance, and
+            track transactions—all in one place. Experience seamless and secure transactions with just your UPI ID.
+          </p>
+          <p>
+            <strong>Why Choose Us?</strong>
+          </p>
+          <ul>
+            <li>✔️ Lightning-fast payments</li>
+            <li>✔️ Easy-to-use interface</li>
+            <li>✔️ Secure and reliable</li>
+            <li>✔️ 24/7 support</li>
+          </ul>
+          <p>Start managing your finances effortlessly today!</p>
+        </div>
       </div>
 
       <div className="transactions">
@@ -99,14 +114,6 @@ const Home = () => {
           upiId={upiId}
         />
       )}
-      {showRequestModal && (
-        <Modal
-          title="Request Money"
-          onClose={() => setShowRequestModal(false)}
-          onSubmit={handleRequestMoney}
-          upiId={upiId}
-        />
-      )}
     </div>
   );
 };
@@ -120,11 +127,11 @@ const Modal = ({ title, onClose, onSubmit, upiId }) => {
       alert("Please enter valid UPI ID and amount");
       return;
     }
-    if (parseFloat(amount) <= 0) { // Add this condition
+    if (parseFloat(amount) <= 0) {
       alert("Amount must be greater than zero");
       return;
     }
-    if (receiverUpiId === upiId) {   // <-- Add this line to check if the user is sending money to themselves
+    if (receiverUpiId === upiId) {
       alert("You cannot send money to yourself.");
       return;
     }
@@ -135,18 +142,24 @@ const Modal = ({ title, onClose, onSubmit, upiId }) => {
     <div className="modal">
       <div className="modal-content">
         <h3>{title}</h3>
-        <input
-          type="text"
-          placeholder="Enter UPI ID"
-          value={receiverUpiId}
-          onChange={(e) => setReceiverUpiId(e.target.value)}
-        />
-        <input
-          type="number"
-          placeholder="Amount"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-        />
+        <div className="forms-group">
+          <label htmlFor="email">Enter UPI'ID:</label>
+          <input
+            type="text"
+            placeholder="Enter Valid UPI'ID"
+            value={receiverUpiId}
+            onChange={(e) => setReceiverUpiId(e.target.value)}
+          />
+        </div>
+        <div className="forms-group">
+          <label htmlFor="email">Enter Amount</label>
+          <input
+            type="number"
+            placeholder="Enter Amount >=1"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+          />
+        </div>
         <div className="modal-actions">
           <button onClick={handleSubmit}>Submit</button>
           <button onClick={onClose}>Cancel</button>
