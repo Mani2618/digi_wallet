@@ -1,56 +1,82 @@
-import React, { useState, useEffect } from 'react';
-import './Navbar.css';
+import React, { useState, useContext } from "react";
 import { Link } from 'react-router-dom';
+import { UserContext } from '../../context/UserContext';  
+import paytmLogo from './img.png';
+import "./Navbar.css";
 
 const Navbar = () => {
-  const [menuOpen, setMenuOpen] = useState(false);  // Manage menu open/close state
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Track login state
+  const [showMenu, setShowMenu] = useState(false);
+  const { user, setUser } = useContext(UserContext); 
 
-  // Toggle menu visibility
   const toggleMenu = () => {
-    setMenuOpen(prevState => !prevState);
+    setShowMenu((prev) => !prev);
   };
 
-  // Check if the user is logged in on initial render
-  useEffect(() => {
-    const token = localStorage.getItem('userToken'); // Check for user token
-    setIsLoggedIn(!!token); // Update login state based on the token
-    console.log('Token in localStorage:', token);
-    console.log('isLoggedIn state:', !!token);
-  }, []); // Re-run only once initially
-  
-  // Handle logout
   const handleLogout = () => {
-    localStorage.removeItem('userToken'); // Remove user token from localStorage
-    setIsLoggedIn(false);  // Update state to reflect logout
+    setUser(null); // Clear user from context
+    localStorage.clear(); // Clear user-related local storage (optional)
+    window.location.href = "/"; 
   };
 
   return (
     <nav className="navbar">
-      <h1>PayTM Wallet</h1>
-      
-      {/* Hamburger button */}
-      <button className="hamburger" onClick={toggleMenu}>
-        <span className="bar"></span>
-        <span className="bar"></span>
-        <span className="bar"></span>
-      </button>
-
-      {/* Menu links */}
-      <div className={`menu-links ${menuOpen ? 'open' : ''}`}>
-        <Link to="/">Home</Link>
-
-        {/* Conditionally render Login/Logout based on the login state */}
-        {!isLoggedIn ? (
-          <>
-            <Link to="/login">Login</Link>
-            <Link to="/signup">Signup</Link>
-          </>
-        ) : (
-          <button className="logout-button" onClick={handleLogout}>Logout</button>
+      <div className="navbar-left">
+        {/* Hamburger Menu */}
+        <div
+          className={`menu-icon ${showMenu ? "active" : ""}`}
+          onClick={toggleMenu}
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+          
+        </div>
+        {showMenu && (
+          <div className="dropdown-menu">
+            <ul>
+            <li>
+                <Link to="/">Home</Link>
+              </li>
+              <li>
+                <Link to="/profile">Profile</Link>
+              </li>
+              <li>
+                <Link to="/transactions">Transaction Page</Link>
+              </li>
+              <li>
+                <Link to="/about">About Section</Link>
+              </li>
+            </ul>
+          </div>
         )}
-        
-        <Link to="/transactions">Transactions</Link>
+        <Link to="/profile">
+        <img src={paytmLogo} alt="Paytm Logo" className="paytm-logo" />
+        </Link>
+      </div>
+
+      <div className="navbar-right">
+        {user ? (
+          <button className="sign-in-btn" onClick={handleLogout}>
+            <img
+              src="https://img.icons8.com/ios-filled/50/ffffff/user-male-circle.png"
+              alt="User Icon"
+              className="user-icon"
+            />
+            Log Out
+          </button>
+          
+        ) : (
+            <Link to="/login">
+            <button className="sign-in-btn">
+              <img
+                src="https://img.icons8.com/ios-filled/50/ffffff/user-male-circle.png"
+                alt="User Icon"
+                className="user-icon"
+              />
+              Sign In
+            </button>
+          </Link>
+        )}
       </div>
     </nav>
   );
