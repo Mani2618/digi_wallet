@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./Pages.css";
 
+
 const Transactions = () => {
   const [transactions, setTransactions] = useState([]);
   const [upiId, setUpiId] = useState("");
@@ -29,23 +30,34 @@ const Transactions = () => {
   return (
     <div className="transactions-container">
       <h2>Your Transactions</h2>
-      <div className="transactions-list">
-        {transactions.length > 0 ? (
-          <ul>
+      {transactions.length > 0 ? (
+        <table className="transactions-table">
+          <thead>
+            <tr>
+              <th>Transaction Type</th>
+              <th>UPI ID</th>
+              <th>Amount (₹)</th>
+              <th>Date & Time</th>
+            </tr>
+          </thead>
+          <tbody>
             {transactions.map((txn) => (
-              <li key={txn._id}>
-                {txn.sender_upi_id === upiId
-                  ? `Sent to ${txn.receiver_upi_id}`
-                  : `Received from ${txn.sender_upi_id}`} 
-                - ₹{txn.amount} 
-                <span>({new Date(txn.timestamp).toLocaleString()})</span>
-              </li>
+              <tr key={txn._id}>
+                <td>{txn.sender_upi_id === upiId ? "Sent" : "Received"}</td>
+                <td>
+                  {txn.sender_upi_id === upiId
+                    ? txn.receiver_upi_id
+                    : txn.sender_upi_id}
+                </td>
+                <td>{txn.amount}</td>
+                <td>{new Date(txn.timestamp).toLocaleString()}</td>
+              </tr>
             ))}
-          </ul>
-        ) : (
-          <p>No transactions found.</p>
-        )}
-      </div>
+          </tbody>
+        </table>
+      ) : (
+        <p>No transactions found.</p>
+      )}
     </div>
   );
 };
